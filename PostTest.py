@@ -38,8 +38,19 @@ class PostTest(unittest.TestCase):
 		# if cannot find then throw exception means fail test case
 		promptLogin = self.driver.find_element_by_class_name("login-prompt-text")
 
-	def test_ableToWriteOrUploadPicInPost(self):
+
+	###################################### Able to write/upload picture in post ######################################
+
+	def test_ableToWriteOrUploadPicInPost_user(self):
 		Automate.login(self.driver, False)
+		self.ableToWriteOrUploadPicInPost()
+
+
+	def test_ableToWriteOrUploadPicInPost_mod(self):
+		Automate.login(self.driver, True)
+		self.ableToWriteOrUploadPicInPost()
+
+	def ableToWriteOrUploadPicInPost(self):
 		# thread selected should not be too close to thread 0 (top thread as new post bump threads to the top.
 		# May cause different test case function to race condition the posts in the same thread
 		Automate.navigateToSelectiveThread(self.driver, 4)
@@ -53,6 +64,8 @@ class PostTest(unittest.TestCase):
 		# see if the test post is successfully created
 		latestPost = self.driver.find_elements_by_class_name("card-text")[0]
 		self.assertEqual(latestPost.text, testMsg)
+
+	###################################### AbleToWriteOrUploadPicInPost ######################################
 
 	def test_postWithoutContent(self):
 		Automate.login(self.driver, False)
@@ -102,3 +115,6 @@ class PostTest(unittest.TestCase):
 		# see if the test post is successfully created
 		latestPost = self.driver.find_elements_by_class_name("card-text")[0]
 		self.assertEqual(latestPost.text, newEditedPostContent)
+
+if __name__ == "__main__":
+    unittest.main()
