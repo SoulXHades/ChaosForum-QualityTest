@@ -51,8 +51,6 @@ class PostTest(unittest.TestCase):
 		self.ableToWriteOrUploadPicInPost()
 
 	def ableToWriteOrUploadPicInPost(self):
-		# thread selected should not be too close to thread 0 (top thread as new post bump threads to the top.
-		# May cause different test case function to race condition the posts in the same thread
 		Automate.navigateToSelectiveThread(self.driver, 4)
 
 		# write post content and click the post button to post
@@ -65,10 +63,17 @@ class PostTest(unittest.TestCase):
 		latestPost = self.driver.find_elements_by_class_name("card-text")[0]
 		self.assertEqual(latestPost.text, testMsg)
 
-	###################################### AbleToWriteOrUploadPicInPost ######################################
+	###################################### Post without content ######################################
 
-	def test_postWithoutContent(self):
+	def test_postWithoutContent_user(self):
 		Automate.login(self.driver, False)
+		self.postWithoutContent()
+
+	def test_postWithoutContent_mod(self):
+		Automate.login(self.driver, True)
+		self.postWithoutContent()
+
+	def postWithoutContent(self):
 		# navigate to first thread on the homepage
 		Automate.navigateToSelectiveThread(self.driver, 0)
 
@@ -84,10 +89,17 @@ class PostTest(unittest.TestCase):
 		# see if the post button is toggled backed to disabled now that the content is empty
 		self.postButton = self.driver.find_element_by_class_name("btn.btn-info.disabled")
 
-	def test_editOwnPost(self):
+	###################################### Edit own post ######################################
+
+	def test_editOwnPost_user(self):
 		Automate.login(self.driver, False)
-		# thread selected should not be too close to thread 0 (top thread as new post bump threads to the top.
-		# May cause different test case function to race condition the posts in the same thread
+		self.editOwnPost()
+
+	def test_editOwnPost_mod(self):
+		Automate.login(self.driver, True)
+		self.editOwnPost()
+
+	def editOwnPost(self):
 		Automate.navigateToSelectiveThread(self.driver, 4)
 		Automate.writeAPost(self.driver, "Testing testing")
 
@@ -112,9 +124,69 @@ class PostTest(unittest.TestCase):
 
 		# delay 5 sec to let page update the new post's content before comparing the content
 		time.sleep(5)
-		# see if the test post is successfully created
+		# see if the post is successfully edited
 		latestPost = self.driver.find_elements_by_class_name("card-text")[0]
 		self.assertEqual(latestPost.text, newEditedPostContent)
+		# see if the edited post reflect it has been edited
+		self.driver.find_elements_by_class_name("edited")[0]
+
+	###################################### Delete own post ######################################
+
+	'''def test_deleteOwnPost_user(self):
+		Automate.login(self.driver, False)
+		self.deleteOwnPost(False)
+
+	def test_deleteOwnPost_mod(self):
+		Automate.login(self.driver, True)
+		self.deleteOwnPost(True)
+
+	def deleteOwnPost(self, isMod):
+		Automate.navigateToSelectiveThread(self.driver, 0)
+		Automate.writeAPost(self.driver, "Testing testing")
+
+		# delay 5 sec to let page update to load the new post into the page
+		time.sleep(5)
+
+		# get the list of posts
+		listOfPosts = self.driver.find_elements_by_class_name("post-card.card")
+
+		# click post options then click the edit button on the latest post we created for this test
+		postOptionButton = self.driver.find_elements_by_class_name("post-dropdown")[0]
+		postOptionButton.click()
+		# there are many dropdown items with the same class name in the same page. So have to find the right one we wants to click
+		# to delete the post we have just created
+		if isMod:
+			postDeleteButton = self.driver.find_elements_by_class_name("dropdown-item")[3]
+		else:
+			postDeleteButton = self.driver.find_elements_by_class_name("dropdown-item")[2]
+		postDeleteButton.click()
+
+		# to click the confirm delete button when being prompted before delete
+		self.driver.implicitly_wait(7)
+		confirmDeleteButton = self.driver.find_element_by_class_name("btn.btn-danger")
+		confirmDeleteButton.click()
+
+		# delay 5 sec to let page update to load the new post into the page
+		time.sleep(3)
+		# get the list of posts after deleting a post
+		newListOfPosts = self.driver.find_elements_by_class_name("post-card.card")
+		# check if the number of posts in the thread should be reduced by 1 means successfully deleted that post
+		self.assertEqual(len(listOfPosts)-1, len(newListOfPosts))
+
+
+	###################################### Edit any post ######################################
+
+	def test_editAnyPost_user(self):
+		Automate.login(self.driver, False)
+		self.editAnyPost()
+
+	def test_editAnyPost_mod(self):
+		Automate.login(self.driver, True)
+		self.editAnyPost()
+
+	def editAnyPost(self):
+		pass'''
+
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=2)

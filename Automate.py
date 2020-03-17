@@ -24,7 +24,7 @@ def login(driver, isMod):
 # navigate into the top thread from the list of threads on the home page
 def navigateToSelectiveThread(driver, threadIndex):
 	# delay 5 sec to let page load
-	driver.implicitly_wait(7)
+	#driver.implicitly_wait(7)
 	# to enter the first thread on the list of threads in the home page
 	thread = driver.find_elements_by_class_name("thread-card.card")[threadIndex]
 	thread.click()
