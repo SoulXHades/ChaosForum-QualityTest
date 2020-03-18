@@ -40,9 +40,10 @@ def navigateToSelectiveThread(driver, threadIndex):
 # to post a content on a thread
 def writeAPost(driver, postContent):
 	# write post content and click the post button to post
-	postTxtBox = driver.find_element_by_class_name("form-control")
+	newPost = driver.find_element_by_class_name("main-thread-card.card")
+	postTxtBox = newPost.find_element_by_class_name("form-control")
 	postTxtBox.send_keys(postContent)
-	postButton = driver.find_element_by_class_name("btn.btn-info")
+	postButton = newPost.find_element_by_class_name("btn.btn-info")
 	postButton.click()
 
 	# delay 5 sec to let page update to show the new post before comparing the content

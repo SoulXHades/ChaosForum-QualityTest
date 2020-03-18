@@ -86,55 +86,56 @@ class PostTest(unittest.TestCase):
 		postButton = self.driver.find_element_by_class_name("btn.btn-info")
 		postTxtBox.clear()
 		# see if the post button is toggled backed to disabled now that the content is empty
-		self.postButton = self.driver.find_element_by_class_name("btn.btn-info.disabled")'''
+		self.postButton = self.driver.find_element_by_class_name("btn.btn-info.disabled")
 
 	###################################### Edit own post ######################################
 
 	def test_editOwnPost_user(self):
 		Automate.login(self.driver, False)
-		self.editOwnPost(False)
+		self.editOwnPost()
 
 	def test_editOwnPost_mod(self):
 		Automate.login(self.driver, True)
-		self.editOwnPost(True)
+		self.editOwnPost()
 
-	def editOwnPost(self, isMod):
+	def editOwnPost(self):
 		Automate.navigateToSelectiveThread(self.driver, 4)
 		Automate.writeAPost(self.driver, "Testing testing")
 
+		# use the 1st post since it is the post we have just written
 		firstPost = self.driver.find_elements_by_class_name("post-card.card")[0]
 		# click post options then click the edit button on the latest post we created for this test
 		postOptionButton = firstPost.find_element_by_class_name("post-dropdown")
 		postOptionButton.click()
+		# get a list of post options then search for the "Edit" option
 		postOptionsList = firstPost.find_elements_by_class_name("dropdown-item")
 		for i in range(len(postOptionsList)):
-			if postOptionsList[0].text == "edit":
-				postOptionsList[0].click()
-			# postEditButton = firstPost.find_elements_by_class_name("dropdown-item")[0]
-			# postEditButton.click()
+			if postOptionsList[i].text == "Edit":
+				postOptionsList[i].click()
+				break
 
 		# write post content and click the post button to post
 		newEditedPostContent = "Hello!"
-		postEditTxtBox = self.driver.find_elements_by_class_name("form-control")[1]
+		postEditTxtBox = firstPost.find_element_by_class_name("form-control")
 		# clear post's content
 		postEditTxtBox.clear()
 		postEditTxtBox.send_keys(newEditedPostContent)
 		# cause have 2 button of the same class name in the same page as one is for the create new post an another is save edited post
-		postButton = self.driver.find_elements_by_class_name("btn.btn-info")[1]
+		postButton = firstPost.find_element_by_class_name("btn.btn-info")
 		postButton.click()
 
 		# delay 5 sec to let page update the new post's content before comparing the content
 		time.sleep(5)
 		# see if the post is successfully edited
-		latestPost = self.driver.find_elements_by_class_name("card-text")[0]
-		self.assertEqual(latestPost.text, newEditedPostContent)
+		firstPostText = firstPost.find_element_by_class_name("card-text")
+		self.assertEqual(firstPostText.text, newEditedPostContent)
 		# see if the edited post reflect it has been edited
-		self.driver.find_elements_by_class_name("edited")[0]
+		firstPost.find_element_by_class_name("edited")'''
 
 
 	###################################### Edit any post ######################################
 
-	'''def test_editAnyPost_user(self):
+	def test_editAnyPost_user(self):
 		self.editAnyPost(False)
 
 	def test_editAnyPost_mod(self):
@@ -185,7 +186,7 @@ class PostTest(unittest.TestCase):
 
 	###################################### Delete own post ######################################
 
-	def test_deleteOwnPost_user(self):
+	'''def test_deleteOwnPost_user(self):
 		Automate.login(self.driver, False)
 		self.deleteOwnPost(False)
 
