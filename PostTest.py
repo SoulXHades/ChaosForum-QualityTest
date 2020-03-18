@@ -17,7 +17,7 @@ class PostTest(unittest.TestCase):
 	###################################### Test Cases ######################################
 
 	# check if page will not allow user to post and there will be an element prompting to login/signup first
-	def test_PostWithoutLogin(self):
+	'''def test_PostWithoutLogin(self):
 		try:
 			# to check the status of the login button see if it is not login before proceeding
 			loginButtonStatus = self.driver.find_element_by_class_name("dropdown-toggle.nav-link")
@@ -57,8 +57,7 @@ class PostTest(unittest.TestCase):
 		testMsg = "Testing 123"
 		Automate.writeAPost(self.driver, testMsg)
 
-		# delay 5 sec to let page update to show the new post before comparing the content
-		time.sleep(5)
+		
 		# see if the test post is successfully created
 		latestPost = self.driver.find_elements_by_class_name("card-text")[0]
 		self.assertEqual(latestPost.text, testMsg)
@@ -87,7 +86,7 @@ class PostTest(unittest.TestCase):
 		postButton = self.driver.find_element_by_class_name("btn.btn-info")
 		postTxtBox.clear()
 		# see if the post button is toggled backed to disabled now that the content is empty
-		self.postButton = self.driver.find_element_by_class_name("btn.btn-info.disabled")
+		self.postButton = self.driver.find_element_by_class_name("btn.btn-info.disabled")'''
 
 	###################################### Edit own post ######################################
 
@@ -103,18 +102,16 @@ class PostTest(unittest.TestCase):
 		Automate.navigateToSelectiveThread(self.driver, 4)
 		Automate.writeAPost(self.driver, "Testing testing")
 
-		# delay 5 sec to let page update to load the new post into the page
-		time.sleep(5)
+		firstPost = self.driver.find_elements_by_class_name("post-card.card")[0]
 		# click post options then click the edit button on the latest post we created for this test
-		postOptionButton = self.driver.find_elements_by_class_name("post-dropdown")[0]
+		postOptionButton = firstPost.find_element_by_class_name("post-dropdown")
 		postOptionButton.click()
-		# there are many dropdown items with the same class name in the same page. So have to find the right one we wants to click
-		# moderator has additional "dropdown-item" cause of Control Panel optiobn
-		if isMod:
-			postEditButton = self.driver.find_elements_by_class_name("dropdown-item")[2]
-		else:
-			postEditButton = self.driver.find_elements_by_class_name("dropdown-item")[1]
-		postEditButton.click()
+		postOptionsList = firstPost.find_elements_by_class_name("dropdown-item")
+		for i in range(len(postOptionsList)):
+			if postOptionsList[0].text == "edit":
+				postOptionsList[0].click()
+			# postEditButton = firstPost.find_elements_by_class_name("dropdown-item")[0]
+			# postEditButton.click()
 
 		# write post content and click the post button to post
 		newEditedPostContent = "Hello!"
@@ -134,6 +131,58 @@ class PostTest(unittest.TestCase):
 		# see if the edited post reflect it has been edited
 		self.driver.find_elements_by_class_name("edited")[0]
 
+
+	###################################### Edit any post ######################################
+
+	'''def test_editAnyPost_user(self):
+		self.editAnyPost(False)
+
+	def test_editAnyPost_mod(self):
+		self.editAnyPost(True)
+
+	def editAnyPost(self, isMod):
+		if isMod:
+			# log in mod account to post at the 1st thread
+			Automate.login(self.driver, False)
+		else:
+			# log in mod account to post at the 1st thread
+			Automate.login(self.driver, True)
+
+		# navigate to first thread and create a post
+		Automate.navigateToSelectiveThread(self.driver, 0)
+		Automate.writeAPost(self.driver, "AAA")
+
+		if isMod:
+			# user account do not have control panel so logout button is 1st option in the list
+			Automate.logout(self.driver, 0)
+			# login moderator account to test if it can edit other people's (for this case is the user's) post at the 1st thread
+			Automate.login(self.driver, True)
+		else:
+			# moderator account have control panel as the 1st option of the list while logout button is 2nd option in the list
+			Automate.logout(self.driver, 1)
+			# login user account to test if it can edit other people's (for this case is the mod's) post at the 1st thread
+			Automate.login(self.driver, False)
+
+		# navigate to first thread
+		Automate.navigateToSelectiveThread(self.driver, 0)
+
+		# click post options then click the edit button on the latest post we created for this test
+		postOptionButton = self.driver.find_elements_by_class_name("post-dropdown")[0]
+		postOptionButton.click()
+
+		if isMod:
+			# get first item in the post option list
+			dropDownFirstItem = self.driver.find_elements_by_class_name("dropdown-item")[2]
+			# only moderator account can edit other people's post hence the 1st option should be "Edit"
+			self.assertEqual(dropDownFirstItem.text, "Edit")
+			# click on the edit button and write content to it
+			dropDownFirstItem.click()
+		else:
+			# get first item in the post option list
+			dropDownFirstItem = self.driver.find_elements_by_class_name("dropdown-item")[1]
+			# user cannot edit other people's post. Hence the 1st option should be "Report post"
+			self.assertEqual(dropDownFirstItem.text, "Report post")
+
 	###################################### Delete own post ######################################
 
 	def test_deleteOwnPost_user(self):
@@ -147,9 +196,6 @@ class PostTest(unittest.TestCase):
 	def deleteOwnPost(self, isMod):
 		Automate.navigateToSelectiveThread(self.driver, 0)
 		Automate.writeAPost(self.driver, "Testing testing")
-
-		# delay 5 sec to let page update to load the new post into the page
-		time.sleep(5)
 
 		# get the list of posts
 		listOfPosts = self.driver.find_elements_by_class_name("post-card.card")
@@ -178,18 +224,54 @@ class PostTest(unittest.TestCase):
 		self.assertEqual(len(listOfPosts)-1, len(newListOfPosts))
 
 
-	###################################### Edit any post ######################################
+	###################################### Delete any post ######################################
 
 	def test_editAnyPost_user(self):
-		Automate.login(self.driver, False)
-		self.editAnyPost()
+		self.editAnyPost(False)
 
 	def test_editAnyPost_mod(self):
-		Automate.login(self.driver, True)
-		self.editAnyPost()
+		self.editAnyPost(True)
 
-	def editAnyPost(self):
-		pass
+	def editAnyPost(self, isMod):
+		if isMod:
+			# log in mod account to post at the 1st thread
+			Automate.login(self.driver, False)
+		else:
+			# log in mod account to post at the 1st thread
+			Automate.login(self.driver, True)
+
+		# navigate to first thread and create a post
+		Automate.navigateToSelectiveThread(self.driver, 0)
+		Automate.writeAPost(self.driver, "AAA")
+
+		if isMod:
+			# user account do not have control panel so logout button is 1st option in the list
+			Automate.logout(self.driver, 0)
+			# login moderator account to test if it can edit other people's (for this case is the user's) post at the 1st thread
+			Automate.login(self.driver, True)
+		else:
+			# moderator account have control panel as the 1st option of the list while logout button is 2nd option in the list
+			Automate.logout(self.driver, 1)
+			# login user account to test if it can edit other people's (for this case is the mod's) post at the 1st thread
+			Automate.login(self.driver, False)
+
+		# navigate to first thread
+		Automate.navigateToSelectiveThread(self.driver, 0)
+
+		# click post options then click the edit button on the latest post we created for this test
+		postOptionButton = self.driver.find_elements_by_class_name("post-dropdown")[0]
+		postOptionButton.click()
+
+		if isMod:
+			# get first item in the post option list
+			dropDownFirstItem = self.driver.find_elements_by_class_name("dropdown-item")[2]
+			# only moderator account can edit other people's post hence the 1st option should be "Edit"
+			self.assertEqual(dropDownFirstItem.text, "Edit")
+		else:
+			# get first item in the post option list
+			dropDownFirstItem = self.driver.find_elements_by_class_name("dropdown-item")[1]
+			# user cannot edit other people's post. Hence the 1st option should be "Report post"
+			self.assertEqual(dropDownFirstItem.text, "Report post")'''
 
 
 if __name__ == "__main__":

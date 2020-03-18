@@ -19,6 +19,13 @@ def login(driver, isMod):
     password.send_keys(pw)
     password.send_keys(Keys.RETURN)
 
+def logout(driver, logoutBtnPos):
+	accountMenuOptions = driver.find_element_by_class_name("dropdown.nav-item")
+	accountMenuOptions.click()
+	logoutButton = driver.find_elements_by_class_name("dropdown-item")[logoutBtnPos]
+	# click to logout
+	logoutButton.click()
+
 
 ###################################### Post Related ######################################
 
@@ -37,3 +44,6 @@ def writeAPost(driver, postContent):
 	postTxtBox.send_keys(postContent)
 	postButton = driver.find_element_by_class_name("btn.btn-info")
 	postButton.click()
+
+	# delay 5 sec to let page update to show the new post before comparing the content
+	time.sleep(5)
