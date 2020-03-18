@@ -22,13 +22,14 @@ def login(driver, isMod):
 def logout(driver, logoutBtnPos):
 	accountMenuOptions = driver.find_element_by_class_name("dropdown.nav-item")
 	accountMenuOptions.click()
+	# get a list of options
 	userOptionsList = accountMenuOptions.find_elements_by_class_name("dropdown-item")
+	# iterate the list of options to find the logout option and click on it to logout
 	for i in range(len(userOptionsList)):
+		# need to use 'in' cause got a logout icon before the "Log out" word in the option which can't find it in Inspect Element so use this to find the log out word
 		if "Log out" in userOptionsList[i].text:
 			userOptionsList[i].click()
 			break
-	# # click to logout
-	# logoutButton.click()
 
 
 ###################################### Post Related ######################################
