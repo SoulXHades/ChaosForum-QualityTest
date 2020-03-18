@@ -19,7 +19,7 @@ def login(driver, isMod):
     password.send_keys(pw)
     password.send_keys(Keys.RETURN)
 
-def logout(driver, logoutBtnPos):
+def logout(driver):
 	accountMenuOptions = driver.find_element_by_class_name("dropdown.nav-item")
 	accountMenuOptions.click()
 	# get a list of options
