@@ -1,4 +1,5 @@
 from selenium.webdriver.common.keys import Keys
+import time
 
 moderator = "limj0202@e.ntu.edu.sg"
 moderator_pw = "123456"
@@ -24,7 +25,7 @@ def login(driver, isMod):
 # navigate into the top thread from the list of threads on the home page
 def navigateToSelectiveThread(driver, threadIndex):
 	# delay 5 sec to let page load
-	#driver.implicitly_wait(7)
+	#time.sleep(3)
 	# to enter the first thread on the list of threads in the home page
 	thread = driver.find_elements_by_class_name("thread-card.card")[threadIndex]
 	thread.click()

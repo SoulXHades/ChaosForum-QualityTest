@@ -93,13 +93,13 @@ class PostTest(unittest.TestCase):
 
 	def test_editOwnPost_user(self):
 		Automate.login(self.driver, False)
-		self.editOwnPost()
+		self.editOwnPost(False)
 
 	def test_editOwnPost_mod(self):
 		Automate.login(self.driver, True)
-		self.editOwnPost()
+		self.editOwnPost(True)
 
-	def editOwnPost(self):
+	def editOwnPost(self, isMod):
 		Automate.navigateToSelectiveThread(self.driver, 4)
 		Automate.writeAPost(self.driver, "Testing testing")
 
@@ -109,7 +109,11 @@ class PostTest(unittest.TestCase):
 		postOptionButton = self.driver.find_elements_by_class_name("post-dropdown")[0]
 		postOptionButton.click()
 		# there are many dropdown items with the same class name in the same page. So have to find the right one we wants to click
-		postEditButton = self.driver.find_elements_by_class_name("dropdown-item")[1]
+		# moderator has additional "dropdown-item" cause of Control Panel optiobn
+		if isMod:
+			postEditButton = self.driver.find_elements_by_class_name("dropdown-item")[2]
+		else:
+			postEditButton = self.driver.find_elements_by_class_name("dropdown-item")[1]
 		postEditButton.click()
 
 		# write post content and click the post button to post
@@ -132,7 +136,7 @@ class PostTest(unittest.TestCase):
 
 	###################################### Delete own post ######################################
 
-	'''def test_deleteOwnPost_user(self):
+	def test_deleteOwnPost_user(self):
 		Automate.login(self.driver, False)
 		self.deleteOwnPost(False)
 
@@ -185,7 +189,7 @@ class PostTest(unittest.TestCase):
 		self.editAnyPost()
 
 	def editAnyPost(self):
-		pass'''
+		pass
 
 
 if __name__ == "__main__":
