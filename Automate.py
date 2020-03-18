@@ -22,9 +22,13 @@ def login(driver, isMod):
 def logout(driver, logoutBtnPos):
 	accountMenuOptions = driver.find_element_by_class_name("dropdown.nav-item")
 	accountMenuOptions.click()
-	logoutButton = driver.find_elements_by_class_name("dropdown-item")[logoutBtnPos]
-	# click to logout
-	logoutButton.click()
+	userOptionsList = accountMenuOptions.find_elements_by_class_name("dropdown-item")
+	for i in range(len(userOptionsList)):
+		if "Log out" in userOptionsList[i].text:
+			userOptionsList[i].click()
+			break
+	# # click to logout
+	# logoutButton.click()
 
 
 ###################################### Post Related ######################################
