@@ -3,21 +3,25 @@ import time
 
 moderator = "limj0202@e.ntu.edu.sg"
 moderator_pw = "123456"
+moderator_name = "JingQiang"
 user = "C170095@e.ntu.edu.sg"
 user_pw = "C170095@e.ntu.edu.sg"
+user_name = "Hao Jie"
 
 def login(driver, isMod):
     driver.find_element_by_link_text("Login").click()
     if isMod:
         driver.find_element_by_name("email").send_keys(moderator)
         pw = moderator_pw
+        name = moderator_name
     else:
         driver.find_element_by_name("email").send_keys(user)
         pw = user_pw
-
+        name = user_name
     password = driver.find_element_by_name("password")
     password.send_keys(pw)
     password.send_keys(Keys.RETURN)
+    return name
 
 def logout(driver):
 	accountMenuOptions = driver.find_element_by_class_name("dropdown.nav-item")
