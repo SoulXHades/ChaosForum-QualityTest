@@ -29,7 +29,7 @@ class LoginTest(unittest.TestCase):
         password = self.driver.find_element_by_name("password")
         password.send_keys(LoginTest.correctPw)
         password.send_keys(Keys.RETURN)
-        self.assertEqual(self.driver.find_element_by_class_name("toast.toast-error ").text, "Email not found.")
+        self.assertEqual(self.driver.find_element_by_class_name("toast.toast-error").text, "Email not found.")
 
     def test_correctLogin(self):
         self.driver.find_element_by_link_text("Login").click()
@@ -45,17 +45,8 @@ class LoginTest(unittest.TestCase):
         password = self.driver.find_element_by_name("password")
         password.send_keys(LoginTest.wrongPw)
         password.send_keys(Keys.RETURN)
-        # self.assertEqual(self.driver.find_element_by_class_name("toast.toast-error ").text, "Wrong password.")
-        self.assertEqual(self.driver.find_element_by_class_name("toast.toast-error ").get_attribute("innerHTML"), "Wrong password.")
+        self.assertEqual(self.driver.find_element_by_class_name("toast.toast-error").text, "Wrong password.")
 
-    def test_voteWithoutLogin(self):
-        # upvote 1st thread without login
-        voteCount = int(self.driver.find_element_by_class_name("votes-section").get_attribute("div")[2].text())
-        self.driver.find_element_by_class_name("vote-icon.upvote-icon ").click()
-        time.sleep(5)
-        newVoteCount = int(self.driver.find_element_by_class_name("votes-section").get_attribute("div")[2].text())
-        self.assertEqual(self.driver.find_element_by_class_name("toast.toast-info ").text, "Log in to vote for this thread!")
-        self.assertEqual(voteCount, newVoteCount)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -314,7 +314,7 @@ class PostTest(unittest.TestCase):
 		else:
 			# user cannot edit other people's post. If have means fail test case. So iterate the list of options to find if have "Edit"
 			for i in range(len(postOptionsList)):
-				self.assertNotEqual(postOptionsList, "Delete post")'''
+				self.assertNotEqual(postOptionsList, "Delete post")
 
 	###################################### Only upvote once per post ######################################
 
@@ -353,16 +353,76 @@ class PostTest(unittest.TestCase):
 		# use the 1st post since it is the post we have just written
 		firstPost = self.driver.find_elements_by_class_name("post-card.card")[0]
 
+		# get the original number of votes
 		voteSection = firstPost.find_element_by_class_name("votes-section")
+		orignNumOfVotes = int(voteSection.text)
 		# search for the upvote button and click on it
 		upVoteButton = voteSection.find_element_by_class_name("vote-icon.upvote-icon")
 		upVoteButton.click()
+		# need time for the vote change to be reflected
+		time.sleep(3)
 		# check if the vote increases by one
-		updatedVoteSection = firstPost.find_element_by_class_name("votes-section")
-		self.assertEqual(int(voteSection.text) + 1, int(updatedVoteSection.text))
+		voteSection = firstPost.find_element_by_class_name("votes-section")
+		self.assertEqual(orignNumOfVotes + 1, int(voteSection.text))
 		upVoteButton.click()
-		updatedVoteSection = firstPost.find_element_by_class_name("votes-section")
-		self.assertEqual(voteSection.text, updatedVoteSection.text)
+		# need time for the vote change to be reflected
+		time.sleep(3)
+		voteSection = firstPost.find_element_by_class_name("votes-section")
+		self.assertEqual(orignNumOfVotes, int(voteSection.text))'''
+
+	###################################### Only upvote once per post ######################################
+
+	def test_downvoteOnce_user(self):
+		self.downvoteOnce(False)
+
+	def test_downvoteOnce_mod(self):
+		self.downvoteOnce(True)
+
+	def downvoteOnce(self, isMod):
+		if isMod:
+			# log in mod account to post at the 1st thread
+			Automate.login(self.driver, False)
+		else:
+			# log in mod account to post at the 1st thread
+			Automate.login(self.driver, True)
+
+		# navigate to first thread and create a post
+		Automate.navigateToSelectiveThread(self.driver, 0)
+		Automate.writeAPost(self.driver, "AAA")
+
+		if isMod:
+			# user account do not have control panel so logout button is 1st option in the list
+			Automate.logout(self.driver)
+			# login moderator account to test if it can edit other people's (for this case is the user's) post at the 1st thread
+			Automate.login(self.driver, True)
+		else:
+			# moderator account have control panel as the 1st option of the list while logout button is 2nd option in the list
+			Automate.logout(self.driver)
+			# login user account to test if it can edit other people's (for this case is the mod's) post at the 1st thread
+			Automate.login(self.driver, False)
+
+		# navigate to first thread
+		Automate.navigateToSelectiveThread(self.driver, 0)
+
+		# use the 1st post since it is the post we have just written
+		firstPost = self.driver.find_elements_by_class_name("post-card.card")[0]
+
+		# get the original number of votes
+		voteSection = firstPost.find_element_by_class_name("votes-section")
+		orignNumOfVotes = int(voteSection.text)
+		# search for the upvote button and click on it
+		upVoteButton = voteSection.find_element_by_class_name("vote-icon.downvote-icon")
+		upVoteButton.click()
+		# need time for the vote change to be reflected
+		time.sleep(3)
+		# check if the vote increases by one
+		voteSection = firstPost.find_element_by_class_name("votes-section")
+		self.assertEqual(orignNumOfVotes - 1, int(voteSection.text))
+		upVoteButton.click()
+		# need time for the vote change to be reflected
+		time.sleep(3)
+		voteSection = firstPost.find_element_by_class_name("votes-section")
+		self.assertEqual(orignNumOfVotes, int(voteSection.text))
 
 
 if __name__ == "__main__":
