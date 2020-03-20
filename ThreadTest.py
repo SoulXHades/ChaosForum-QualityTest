@@ -68,11 +68,7 @@ class ThreadTest(unittest.TestCase):
         for threadIndex, thread in enumerate(threads):
             if thread.find_elements_by_class_name("data")[3].text == username:
                 # Read thread details
-                school = thread.find_elements_by_class_name("data")[0].text
-                course = thread.find_elements_by_class_name("data")[1].text
-                title = thread.find_element_by_class_name("card-title").text
-                print("Old:")
-                print([school, course, title])
+                threadDetails = Automate.getThreadDetails(thread)
                 # Click Thread Options -> Edit
                 thread.find_element_by_class_name("thread-dropdown").click()
                 thread.find_element_by_class_name("dropdown-item").click()
@@ -82,15 +78,10 @@ class ThreadTest(unittest.TestCase):
         container = self.driver.find_element_by_class_name("card-body")
         titleField = container.find_element_by_name("thread_title")
         titleField.clear()
-        titleField.send_keys(title + " new")
+        titleField.send_keys(threadDetails["title"] + " edited")
         dropdowns = container.find_elements_by_class_name("css-1hwfws3")
         dropdowns[0].click()
         collegeList = self.driver.find_element_by_xpath("/html/body/div[1]/div/div/div/form/div[2]/div[2]/div[1]/div").text.split("\n")
-        
-        # if collegeList[1] in collegeList[0]:
-        #     self.actions.send_keys(Keys.DOWN).send_keys(Keys.RETURN)
-        # else:
-        #     self.actions.send_keys(Keys.RETURN)
 
         for i in range(1, len(collegeList)):
             if collegeList[i] in collegeList[0]:
@@ -104,23 +95,69 @@ class ThreadTest(unittest.TestCase):
         school_new = dropdowns[1].text
         course_new = dropdowns[2].text
         title_new = titleField.text
-        print("New:")
-        print([school_new, course_new, title_new])
         self.driver.find_element_by_class_name("btn.btn-info").click()
         # using threadIndex as page is refreshed -> DOM became stale
-        school_displayed = self.driver.find_elements_by_class_name("thread-card.card")[threadIndex].find_elements_by_class_name("data")[0].text
-        course_displayed = self.driver.find_elements_by_class_name("thread-card.card")[threadIndex].find_elements_by_class_name("data")[1].text
-        title_displayed = self.driver.find_elements_by_class_name("thread-card.card")[threadIndex].find_element_by_class_name("card-title").text
-        print("Displayed:")
-        print([school_displayed, course_displayed, title_displayed])
+        threadDetails_displayed = Automate.getThreadDetails(self.driver.find_elements_by_class_name("thread-card.card")[threadIndex])
         # Check that thread details are updated correctly
-        self.assertNotEqual(school_displayed, school)
-        self.assertNotEqual(course_displayed, course)
-        self.assertNotEqual(title_displayed, title)
-        self.assertEqual(school_displayed, school_new)
-        self.assertEqual(course_displayed, course_new)
-        self.assertEqual(title_displayed, title_new)
+        self.assertNotEqual(threadDetails_displayed["school"], threadDetails["school"])
+        self.assertNotEqual(threadDetails_displayed["course"], threadDetails["course"])
+        self.assertNotEqual(threadDetails_displayed["title"], threadDetails["title"])
+        self.assertEqual(threadDetails_displayed["school"], school_new)
+        self.assertEqual(threadDetails_displayed["course"], course_new)
+        self.assertEqual(threadDetails_displayed["title"], title_new)
 
+    def test_editAnyThread_mod(self):
+        Automate.login(self.driver, True)
+        threads = self.driver.find_elements_by_class_name("thread-card.card")
+        for threadIndex, thread in enumerate(threads):
+            # Read thread details
+            threadDetails = Automate.getThreadDetails(thread)
+            # Click Thread Options -> Edit
+            thread.find_element_by_class_name("thread-dropdown").click()
+            thread.find_element_by_class_name("dropdown-item").click()
+            break
+
+        container = self.driver.find_element_by_class_name("card-body")
+        titleField = container.find_element_by_name("thread_title")
+        titleField.clear()
+        titleField.send_keys(threadDetails["title"] + " edited")
+        dropdowns = container.find_elements_by_class_name("css-1hwfws3")
+        dropdowns[0].click()
+        collegeList = self.driver.find_element_by_xpath("/html/body/div[1]/div/div/div/form/div[2]/div[2]/div[1]/div").text.split("\n")
+
+        for i in range(1, len(collegeList)):
+            if collegeList[i] in collegeList[0]:
+                break
+            else:
+                self.actions.send_keys(Keys.DOWN)
+        self.actions.send_keys(Keys.DOWN).send_keys(Keys.RETURN)
+
+        self.actions.move_to_element(dropdowns[1]).click().send_keys(Keys.RETURN)
+        self.actions.move_to_element(dropdowns[2]).click().send_keys(Keys.RETURN).perform()
+        school_new = dropdowns[1].text
+        course_new = dropdowns[2].text
+        title_new = titleField.text
+        self.driver.find_element_by_class_name("btn.btn-info").click()
+        # using threadIndex as page is refreshed -> DOM became stale
+        threadDetails_displayed = Automate.getThreadDetails(self.driver.find_elements_by_class_name("thread-card.card")[threadIndex])
+        # Check that thread details are updated correctly
+        self.assertNotEqual(threadDetails_displayed["school"], threadDetails["school"])
+        self.assertNotEqual(threadDetails_displayed["course"], threadDetails["course"])
+        self.assertNotEqual(threadDetails_displayed["title"], threadDetails["title"])
+        self.assertEqual(threadDetails_displayed["school"], school_new)
+        self.assertEqual(threadDetails_displayed["course"], course_new)
+        self.assertEqual(threadDetails_displayed["title"], title_new)
+
+    def test_editAnyThread_user(self):
+        username = Automate.login(self.driver, False)
+        threads = self.driver.find_elements_by_class_name("thread-card.card")
+        for thread in threads:
+            if thread.find_elements_by_class_name("data")[3].text != username:
+                thread.find_element_by_class_name("thread-dropdown").click()
+                options = thread.find_elements_by_class_name("dropdown-item")
+                for option in options:
+                    self.assertNotIn("Edit", option.text)
+            break
 
     def test_deleteOwnThread(self):
         username = Automate.login(self.driver, False)
@@ -137,13 +174,42 @@ class ThreadTest(unittest.TestCase):
         newThreadCount = len(self.driver.find_elements_by_class_name("thread-card.card"))
         self.assertEqual(threadCount-1, newThreadCount)
 
+    def test_deleteAnyThread_user(self):
+        username = Automate.login(self.driver, False)
+        threads = self.driver.find_elements_by_class_name("thread-card.card")
+        for thread in threads:
+            if thread.find_elements_by_class_name("data")[3].text != username:
+                thread.find_element_by_class_name("thread-dropdown").click()
+                options = thread.find_elements_by_class_name("dropdown-item")
+                optionFound = False
+                for option in options:
+                    print("option:", option.text)
+                    self.assertNotIn("Delete thread", option.text)
+                    optionFound = True
+                    break
+                if optionFound:
+                    break
+
+    def test_deleteAnyThread_mod(self):
+        Automate.login(self.driver, True)
+        threads = self.driver.find_elements_by_class_name("thread-card.card")
+        threadCount = len(threads)
+        for thread in threads:
+            thread.find_element_by_class_name("thread-dropdown").click()
+            thread.find_elements_by_class_name("dropdown-item")[1].click()
+            self.driver.find_element_by_class_name("btn.btn-danger").click()
+            break
+        time.sleep(5)
+        newThreadCount = len(self.driver.find_elements_by_class_name("thread-card.card"))
+        self.assertEqual(threadCount-1, newThreadCount)
+
     def test_reportThread(self):
         username = Automate.login(self.driver, False)
         for thread in self.driver.find_elements_by_class_name("thread-card.card"):
+            optionFound = False
             if thread.find_elements_by_class_name("data")[3].text != username:
                 # time.sleep(1)
                 thread.find_element_by_class_name("thread-dropdown").click()
-                optionFound = False
                 try:
                     options = thread.find_element_by_class_name("dropdown-menu.show").find_elements_by_class_name("dropdown-item")
                     for option in options:
@@ -159,7 +225,7 @@ class ThreadTest(unittest.TestCase):
             if optionFound:
                 break
         self.driver.find_element_by_class_name("custom-control-label").click()
-        self.driver.find_element_by_class_name  ("btn.btn-danger").click()
+        self.driver.find_element_by_class_name("btn.btn-danger").click()
 
         # view thread to get thread url
         time.sleep(3)
@@ -260,7 +326,6 @@ class ThreadTest(unittest.TestCase):
             print("new:", school_result, course_result)
             self.assertEqual(school_filtered, school_result)
             self.assertEqual(course_filtered, course_result)
-        
 
 
 if __name__ == "__main__":
