@@ -17,7 +17,7 @@ class PostTest(unittest.TestCase):
 	###################################### Test Cases ######################################
 
 	# check if page will not allow user to post and there will be an element prompting to login/signup first
-	'''def test_PostWithoutLogin(self):
+	def test_PostWithoutLogin(self):
 		try:
 			# to check the status of the login button see if it is not login before proceeding
 			loginButtonStatus = self.driver.find_element_by_class_name("dropdown-toggle.nav-link")
@@ -368,7 +368,7 @@ class PostTest(unittest.TestCase):
 		# need time for the vote change to be reflected
 		time.sleep(3)
 		voteSection = firstPost.find_element_by_class_name("votes-section")
-		self.assertEqual(orignNumOfVotes, int(voteSection.text))'''
+		self.assertEqual(orignNumOfVotes, int(voteSection.text))
 
 	###################################### Only upvote once per post ######################################
 
@@ -414,15 +414,132 @@ class PostTest(unittest.TestCase):
 		upVoteButton = voteSection.find_element_by_class_name("vote-icon.downvote-icon")
 		upVoteButton.click()
 		# need time for the vote change to be reflected
-		time.sleep(3)
+		time.sleep(5)
 		# check if the vote increases by one
 		voteSection = firstPost.find_element_by_class_name("votes-section")
 		self.assertEqual(orignNumOfVotes - 1, int(voteSection.text))
 		upVoteButton.click()
 		# need time for the vote change to be reflected
-		time.sleep(3)
+		time.sleep(5)
 		voteSection = firstPost.find_element_by_class_name("votes-section")
 		self.assertEqual(orignNumOfVotes, int(voteSection.text))
+
+	###################################### Report thread ######################################
+
+	def test_reportThread_user(self):
+		self.reportThread(False)
+
+	def test_reportThread_mod(self):
+		self.reportThread(True)
+
+	def reportThread(self, isMod):
+		# content to write to a post
+		contentToWrite = "AAA"
+
+		if isMod:
+			# log in mod account to post at the 1st thread
+			Automate.login(self.driver, False)
+		else:
+			# log in mod account to post at the 1st thread
+			Automate.login(self.driver, True)
+
+		# navigate to first thread and create a post
+		Automate.navigateToSelectiveThread(self.driver, 0)
+		Automate.writeAPost(self.driver, contentToWrite)
+
+		if isMod:
+			# user account do not have control panel so logout button is 1st option in the list
+			Automate.logout(self.driver)
+			# login moderator account to test if it can report other people's (for this case is the user's) post at the 1st thread
+			reporterUsername = Automate.login(self.driver, True)
+		else:
+			# moderator account have control panel as the 1st option of the list while logout button is 2nd option in the list
+			Automate.logout(self.driver)
+			# login user account to test if it can report other people's (for this case is the mod's) post at the 1st thread
+			reporterUsername = Automate.login(self.driver, False)
+
+		# navigate to first thread
+		Automate.navigateToSelectiveThread(self.driver, 0)
+
+		# use the 1st post since it is the post we have just written
+		firstPost = self.driver.find_elements_by_class_name("post-card.card")[0]
+		# click post options
+		postOptionButton = firstPost.find_element_by_class_name("post-dropdown")
+		postOptionButton.click()
+		# get a list of post options
+		postOptionsList = firstPost.find_elements_by_class_name("dropdown-item")
+		# there are many dropdown items with the same class name in the same page. So have to find the right one we wants to click
+		# to report the post we have just created
+		for i in range(len(postOptionsList)):
+				if "Report post" in postOptionsList[i].text:
+					postOptionsList[i].click()
+					break
+
+		# to confirm reporting the post and reason for reporting
+		self.driver.find_element_by_class_name("custom-control-label").click()
+		self.driver.find_element_by_class_name  ("btn.btn-danger").click()
+
+		# takes time for the page to load after reporting
+		time.sleep(3)
+		
+		# get the URL for the thread the post is in
+		threadUrl = self.driver.current_url
+
+		# login moderator account if is user account testing if reporting works
+		if not isMod:
+			# Logout
+			Automate.logout(self.driver)
+			# Login with Moderator account to access Control Panel
+			Automate.login(self.driver, True)
+
+		accountMenuOptions = self.driver.find_element_by_class_name("dropdown.nav-item")
+		accountMenuOptions.click()
+		# get a list of options
+		userOptionsList = accountMenuOptions.find_elements_by_class_name("dropdown-item")
+		# iterate the list of options to find the Control Panel option and click on it to access it
+		for i in range(len(userOptionsList)):
+			if "Control Panel" in userOptionsList[i].text:
+				userOptionsList[i].click()
+				break
+
+		time.sleep(1)
+		# Check that reported thread is recorded in Control Panel
+		# click on the "Reported posts" tab button
+		reportedPostsTabButton = self.driver.find_elements_by_xpath("//a[@class='nav-link']")[0]
+		reportedPostsTabButton.click()
+
+		time.sleep(1)
+		reportedPostsTab = self.driver.find_element_by_class_name("tab-pane.active")
+		# get a list of reported posts
+		reportedPostList = reportedPostsTab.find_elements_by_class_name("report-card.card")
+
+		for i in range(len(reportedPostList)):
+			user_reported = reportedPostList[i].find_element_by_class_name("data").text
+			postContent = reportedPostList[i].find_element_by_class_name("card-title").text
+
+			if user_reported == reporterUsername and postContent == contentToWrite:
+				reportedPostList[i].click()
+				time.sleep(3)
+				
+				try:
+					# check if is the same post based on the thread the post is in cause can have the same user and post content but in different threads
+					self.assertEqual(threadUrl, self.driver.current_url)
+					return
+				# driver with same name and title will be removed
+				except AssertionError:
+					self.driver.back()
+					# click on the "Reported posts" tab button cause pressed back then it's default at "Reported threads" page and DOM will stale
+					reportedPostsTabButton = self.driver.find_elements_by_xpath("//a[@class='nav-link']")[0]
+					reportedPostsTabButton.click()
+					# let it have time to load
+					time.sleep(1)
+					reportedPostsTab = self.driver.find_element_by_class_name("tab-pane.active")
+					# get a list of reported posts since DOM will be stale so need get the new DOM object
+					reportedPostList = reportedPostsTab.find_elements_by_class_name("report-card.card")
+
+
+		# throws assertion exception since reported post not found in list of reported posts in the control panel
+		raise AssertionError()
 
 
 if __name__ == "__main__":
