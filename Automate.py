@@ -57,3 +57,20 @@ def writeAPost(driver, postContent):
 
 	# delay 5 sec to let page update to show the new post before comparing the content
 	time.sleep(5)
+
+
+################################# Thread Related #########################################
+
+def getThreadDetails(thread):
+	school = thread.find_elements_by_class_name("data")[0].text
+	course = thread.find_elements_by_class_name("data")[1].text
+	user = thread.find_elements_by_class_name("data")[3].text
+	date = thread.find_elements_by_class_name("data")[4].text
+	title = thread.find_element_by_class_name("card-title").text
+	return {
+		"school": school,
+		"course": course,
+		"user": user,
+		"date": date,
+		"title": title
+	}

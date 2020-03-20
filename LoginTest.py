@@ -21,6 +21,7 @@ class LoginTest(unittest.TestCase):
         self.driver.find_element_by_link_text("Login").click()
         self.driver.find_element_by_name("email").send_keys(LoginTest.invalidEmail)
         self.driver.find_element_by_id("root").click()
+        time.sleep(1)
         self.assertEqual(self.driver.find_element_by_class_name("invalid-feedback").text, "Please use your NTU email")
 
     def test_unregisteredEmail(self):
@@ -29,6 +30,7 @@ class LoginTest(unittest.TestCase):
         password = self.driver.find_element_by_name("password")
         password.send_keys(LoginTest.correctPw)
         password.send_keys(Keys.RETURN)
+        time.sleep(1)
         self.assertEqual(self.driver.find_element_by_class_name("toast.toast-error").text, "Email not found.")
 
     def test_correctLogin(self):
@@ -37,6 +39,7 @@ class LoginTest(unittest.TestCase):
         password = self.driver.find_element_by_name("password")
         password.send_keys(LoginTest.correctPw)
         password.send_keys(Keys.RETURN)
+        time.sleep(1)
         self.assertEqual(self.driver.find_element_by_class_name("toast.toast-success ").text, "Login Success! You will be redirected shortly")
 
     def test_wrongPassword(self):
@@ -45,6 +48,7 @@ class LoginTest(unittest.TestCase):
         password = self.driver.find_element_by_name("password")
         password.send_keys(LoginTest.wrongPw)
         password.send_keys(Keys.RETURN)
+        time.sleep(1)
         self.assertEqual(self.driver.find_element_by_class_name("toast.toast-error").text, "Wrong password.")
 
 

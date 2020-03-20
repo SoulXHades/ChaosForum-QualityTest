@@ -1,6 +1,9 @@
 import unittest
 import LoginTest, RegistrationTest, ThreadTest, PostTest
 
+import HtmlTestRunner
+import os
+
 def main():
     # suite = unittest.TestLoader().loadTestsFromModule(LoginTest)
     # unittest.TextTestRunner(verbosity=2).run(suite)
@@ -9,10 +12,21 @@ def main():
     tests = unittest.TestLoader()
     suite.addTests(tests.loadTestsFromModule(LoginTest))
     suite.addTests(tests.loadTestsFromModule(ThreadTest))
-    suite.addTests(tests.loadTestsFromModule(PostTest))
-    suite.addTests(tests.loadTestsFromModule(RegistrationTest))
-    unittest.TextTestRunner(verbosity=2).run(suite)
-
+    # suite.addTests(tests.loadTestsFromModule(PostTest))
+    # suite.addTests(tests.loadTestsFromModule(RegistrationTest))
+    # unittest.TextTestRunner(verbosity=2).run(suite)
+    
+    
+    curr_dir = os.getcwd()
+    # outfile = open(curr_dir + "/ChaosTestReport.txt", "w")
+    runner = HtmlTestRunner.HTMLTestRunner(
+        output=curr_dir+"/Report",
+        # stream=outfile,
+        report_title='Chaos Test Report',
+        report_name='ChaosTestReport',
+        combine_reports=True,
+    )
+    runner.run(suite)
 
 if __name__ == "__main__":
     main()
