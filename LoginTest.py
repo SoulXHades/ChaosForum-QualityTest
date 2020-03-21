@@ -19,34 +19,34 @@ class LoginTest(unittest.TestCase):
 
     def test_invalidEmail(self):
         self.driver.find_element_by_link_text("Login").click()
-        self.driver.find_element_by_name("email").send_keys(LoginTest.invalidEmail)
+        self.driver.find_element_by_name("email").send_keys(self.invalidEmail)
         self.driver.find_element_by_id("root").click()
         time.sleep(1)
         self.assertEqual(self.driver.find_element_by_class_name("invalid-feedback").text, "Please use your NTU email")
 
     def test_unregisteredEmail(self):
         self.driver.find_element_by_link_text("Login").click()
-        self.driver.find_element_by_name("email").send_keys(LoginTest.unregisteredEmail)
+        self.driver.find_element_by_name("email").send_keys(self.unregisteredEmail)
         password = self.driver.find_element_by_name("password")
-        password.send_keys(LoginTest.correctPw)
+        password.send_keys(self.correctPw)
         password.send_keys(Keys.RETURN)
         time.sleep(1)
         self.assertEqual(self.driver.find_element_by_class_name("toast.toast-error").text, "Email not found.")
 
     def test_correctLogin(self):
         self.driver.find_element_by_link_text("Login").click()
-        self.driver.find_element_by_name("email").send_keys(LoginTest.registeredEmail)
+        self.driver.find_element_by_name("email").send_keys(self.registeredEmail)
         password = self.driver.find_element_by_name("password")
-        password.send_keys(LoginTest.correctPw)
+        password.send_keys(self.correctPw)
         password.send_keys(Keys.RETURN)
         time.sleep(1)
         self.assertEqual(self.driver.find_element_by_class_name("toast.toast-success ").text, "Login Success! You will be redirected shortly")
 
     def test_wrongPassword(self):
         self.driver.find_element_by_link_text("Login").click()
-        self.driver.find_element_by_name("email").send_keys(LoginTest.registeredEmail)
+        self.driver.find_element_by_name("email").send_keys(self.registeredEmail)
         password = self.driver.find_element_by_name("password")
-        password.send_keys(LoginTest.wrongPw)
+        password.send_keys(self.wrongPw)
         password.send_keys(Keys.RETURN)
         time.sleep(1)
         self.assertEqual(self.driver.find_element_by_class_name("toast.toast-error").text, "Wrong password.")
